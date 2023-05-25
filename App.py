@@ -1,6 +1,7 @@
 import streamlit as st
-import json
+# import json
 import pandas as pd
+from PIL import Image
 import matplotlib.pyplot as plt
 from jsonbin import load_key, save_key
 import yaml
@@ -34,37 +35,16 @@ elif authentication_status == None:
     st.warning('Please enter your username and password')
     st.stop()
 
-#st.write(username)
 
+### APP ###
+# Daten laden
 data = load_key(api_key, bin_id, username)
-#st.write(data)
-
-
-
-# Funktion um die Daten zu laden
-def load_data(filename):
-    with open(filename, "r", encoding="utf-8") as file:
-        data = json.load(file)
-    return data
-
-# Funktion um Daten zu speichern
-def save_data(data, filename):
-    with open(filename, "w", encoding="utf-8") as file:
-        json.dump(data, file, indent=2, ensure_ascii=False)
-
-#save_key(api_key, bin_id, data)
-
-# Daten laden oder leeres Dictionary aufmachen
-filename = "data.json"
-data = load_data(filename)
 if not data:
     data = {}
 
 # Streamlit app und Titel
 st.title(":red[Mein Blutdruck-Tagebuch]")
-
 st.subheader("Messwerteingaben")
-
 
 # Dropdown für das Datum
 date = st.date_input("Datum", value=pd.Timestamp.now().date())
@@ -80,9 +60,10 @@ pulse = st.slider("Puls (bpm)", 0, 200)
 # Submit button 
 if st.button("Speichern"):
     # Überprüfen ob Daten für gleiches Datum & Zeit existieren
-    if f"{date} {time}" in data:
+    if f"{date} {time}" in data.keys():
         st.error("Es wurden bereits Daten für das ausgewählte Datum und die ausgewählte Uhrzeit eingegeben!")
     else:
+        # data[f"{date}_{time}"] = {}
         # Gemessene Daten im Dictionary speichern
         data[f"{date} {time}"] = {
             "Systole": systole,
@@ -90,7 +71,7 @@ if st.button("Speichern"):
             "Puls": pulse
         }
         # Daten speichern im File
-        save_data(data, filename)
+        save_key(api_key, bin_id, username, data)
 
 # Gemessene Daten als Dataframe anzeigen
 df = pd.DataFrame(data).T
@@ -117,6 +98,5 @@ if not df.empty:
 st.info('Bevor Sie ihre Messung durchführen, sollten Sie sich in Ruhe 5 Minuten hinsetzten', icon="ℹ️")
 
 #Bild einfügen
-from PIL import Image
 image= Image.open ("Blutdruck.jpg")
 st.image(image,caption="richtiges Blutdruckmessen")
