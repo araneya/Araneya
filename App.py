@@ -36,7 +36,7 @@ elif authentication_status == None:
     st.stop()
 
 
-### APP ###
+## APP ###
 # Daten laden
 data = load_key(api_key, bin_id, username)
 if not data:
